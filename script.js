@@ -9,24 +9,24 @@ $(document).ready( function() {
 	paper.setup(canvas);
 
 	// global object to store all parameters: braille dimensions are standards
-	let braille = { 
-		marginWidth: 20, 
-		marginHeight: 20, 
-		paperWidth: 170, 
-		paperHeight: 125, 
-		letterWidth: 2.54, 
-		dotRadius: 1.25, 
-		letterPadding: 3.75, 
-		linePadding: 5.3, 
-		headDownPosition: -2.0, 
-		headUpPosition: 10, 
-		speed: 5000, 
-		delta: false, 
-		goToZero: false, 
-		invertX: false, 
-		invertY: false, 
-		mirrorX: false, 
-		mirrorY: false, 
+	let braille = {
+		marginWidth: 20,
+		marginHeight: 20,
+		paperWidth: 170,
+		paperHeight: 125,
+		letterWidth: 2.54,
+		dotRadius: 1.25,
+		letterPadding: 3.75,
+		linePadding: 5.3,
+		headDownPosition: -2.0,
+		headUpPosition: 10,
+		speed: 5000,
+		delta: false,
+		goToZero: false,
+		invertX: false,
+		invertY: false,
+		mirrorX: false,
+		mirrorY: false,
 		svgStep: 2,
 		svgDots: true,
 		svgPosX: 0,
@@ -39,7 +39,7 @@ $(document).ready( function() {
 
 	let text = '';
 	let gcode = '';
-	
+
 
 	// Replace a char at index in a string
 	function replaceAt(s, n, t) {
@@ -93,7 +93,7 @@ $(document).ready( function() {
 		let px = braille.invertX ? -point.x : braille.paperWidth - point.x;
 		let py = braille.invertY ? -point.y : braille.paperHeight - point.y;
 		gcode.code += gcodeMoveTo(braille.mirrorX ? -px : px, braille.mirrorY ? -py : py)
-		
+
 		// move printer head
 		gcode.code += gcodeMoveTo(null, null, braille.headDownPosition)
 		if(braille.svgDots || lastDot) {
@@ -144,7 +144,7 @@ $(document).ready( function() {
 	let brailleToGCode = function() {
 		let is8dot = braille.language.indexOf("8 dots") >= 0
 
-		// Compute the pixel to millimeter ratio 
+		// Compute the pixel to millimeter ratio
 		let paperWidth = braille.paperWidth;
 		let paperHeight = braille.paperHeight;
 
@@ -158,7 +158,7 @@ $(document).ready( function() {
 		let finalHeightPixel = 0;
 
 		let pixelMillimeterRatio = Math.min(canvasWidth / paperWidth, canvasHeight / paperHeight)
-		
+
 		// Up / down position of the printer head, in millimeter
 		let headUpPosition = braille.headUpPosition;
 		let headDownPosition = braille.headDownPosition;
@@ -194,10 +194,10 @@ $(document).ready( function() {
 		for(let i = 0 ; i < textCopy.length ; i++) {
 			let char = textCopy[i]
 
-			// check special cases: 
+			// check special cases:
 			let charIsCapitalLetter = is8dot ? false : /[A-Z]/.test(char)
 			let charIsLineBreak = /\r?\n|\r/.test(char)
-			
+
 			// If char is line break: reset currentX and increase currentY
 			if(charIsLineBreak) {
 				currentY += (is8dot ? 2 : 3) * letterWidth + braille.linePadding;
@@ -209,12 +209,12 @@ $(document).ready( function() {
 				continue;
 			}
 
-			// Check if char exists in map 
+			// Check if char exists in map
 			if(!latinToBraille.has(char.toLowerCase())) {
 				console.log('Character ' + char + ' was not translated in braille.');
 				continue;
 			}
-			
+
 			let indices = latinToBraille.get(char);
 
 			// handle special cases:
@@ -247,7 +247,7 @@ $(document).ready( function() {
 			// Draw braille char and compute gcode
 			let charGroup = new Group()
 			textGroup.addChild(charGroup)
-			
+
 			// Iterate through all indices
 			for(let y = 0 ; y < (is8dot ? 4 : 3) ; y++) {
 				for(let x = 0 ; x < 2 ; x++) {
@@ -275,7 +275,7 @@ $(document).ready( function() {
 
 							gcode += gcodeMoveTo(braille.mirrorX ? -gx : gx, braille.mirrorY ? -gy : gy)
 						}
-						
+
 						// move printer head
 						gcode += gcodeMoveTo(null, null, headDownPosition)
 						gcode += gcodeMoveTo(null, null, headUpPosition)
@@ -296,7 +296,7 @@ $(document).ready( function() {
 				break;
 			}
 		}
-		
+
 		let mmPerPixels =  paper.view.bounds.width / braille.paperWidth
 
 		// Print the SVG
@@ -304,7 +304,7 @@ $(document).ready( function() {
 			let gcodeObject = {
 				code: gcode
 			}
-			
+
 			svg.scaling = 1 / mmPerPixels
 			svgToGCode(svg, gcodeObject)
 			svg.scaling = mmPerPixels
@@ -316,7 +316,7 @@ $(document).ready( function() {
 			gcode += gcodeMoveTo(0, 0, 0)
 		}
 		$("#gcode").val(gcode)
-		
+
 		paper.project.activeLayer.addChild(svg)
 		let printBounds = textGroup.bounds
 		if(svg != null) {
@@ -334,7 +334,7 @@ $(document).ready( function() {
 		numberPrefix = languages[braille.language].numberPrefix
 
 		dotMap = languages[braille.language].dotMap
-		
+
 		if(dotMap == null) {
 			throw new Error('Dot eight map.')
 		}
@@ -343,7 +343,7 @@ $(document).ready( function() {
 		// latinToBraille.set('a', [1, 2]);
 		// latinToBraille.set('b', [1, 4, 5]);
 		let brailleJSON = languages[braille.language].latinToBraille
-		
+
 		for(let char in brailleJSON) {
 			latinToBraille.set(char, brailleJSON[char])
 		}
@@ -384,7 +384,7 @@ $(document).ready( function() {
 	createController('letterPadding', 1, 30, null, charDimensionsFolder, 'Letter padding');
 	createController('linePadding', 1, 30, null, charDimensionsFolder, 'Line padding');
 	charDimensionsFolder.open();
-	
+
 	let printerSettingsFolder = gui.addFolder('Printer settings');
 	createController('headDownPosition', -150, 150, null, printerSettingsFolder, 'Head down pos.');
 	createController('headUpPosition', -150, 150, null, printerSettingsFolder, 'Head up pos.');
@@ -427,7 +427,7 @@ $(document).ready( function() {
 
 		for (let i = 0; i < files.length; i++) {
 			let file = files.item(i)
-			
+
 			let imageType = /^image\//
 
 			if (!imageType.test(file.type)) {
@@ -449,7 +449,7 @@ $(document).ready( function() {
 		} else {
 			divJ.click()
 		}
-		
+
 	} }, 'importSVG')
 	svgButton.name('Import SVG')
 
